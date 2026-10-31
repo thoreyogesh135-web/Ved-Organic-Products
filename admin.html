@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard | Ved Organic Products</title>
+<style>
+:root{--green:#176b3a;--dark:#103b25;--lime:#d8efb2;--cream:#f7fbf4;--ink:#203027;--muted:#68776d;--line:#dce8dd;--red:#a92c25}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Devanagari",sans-serif;background:var(--cream);color:var(--ink)}
+header{background:var(--dark);color:#fff;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;}
+header h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+.container{max-width:900px;margin:30px auto;padding:0 5%;}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:25px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+.panel h3 { margin-top: 0; color: var(--dark); border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 20px; }
+.btn{border:0;border-radius:8px;padding:10px 16px;font-weight:bold;cursor:pointer;font-size:14px;display:inline-block;}
+.primary{background:var(--green);color:white;}
+.primary:hover{background:var(--dark);}
+.light{background:white;color:var(--green);border:1px solid var(--line);}
+.danger{background:#fff0ef;color:var(--red);border:1px solid #ffd2cf;}
+.hidden{display:none!important;}
+.input, select, textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;margin-top:5px;font:inherit;}
+.field{margin-bottom:15px;}
+.field label { font-weight: bold; font-size: 13px; color: var(--ink); }
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:15px;border-bottom:1px solid var(--line);}
+.list-item:last-child{border-bottom:none;}
+.pic{width:50px;height:50px;background:#e8f4e4;border-radius:8px;object-fit:cover; border:1px solid var(--line);}
+.badge { background: #e6f4e5; color: var(--green); padding: 4px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+@media(max-width:600px){ .two{grid-template-columns:1fr;} .list-item{flex-direction:column; align-items:flex-start; gap:10px;} .list-item .row{width:100%; justify-content:flex-start;} }
+</style>
+</head>
+<body>
+<header>
+  <h2>⚙️ Ved Organic - Admin Dashboard</h2>
+  <button id="logoutBtn" class="btn light hidden">Logout</button>
+</header>
+
+<div class="container">
+  <!-- Login Area -->
+  <div id="loginArea" class="panel">
+    <h3>Admin Login</h3>
+    <p style="color:var(--muted); font-size:14px;">तुमचा एडमिन पासवर्ड टाकून लॉग इन करा.</p>
+    <div class="field" style="max-width: 300px;">
+      <label>Password (Demo: VedAdmin123)</label>
+      <input type="password" id="adminPassword" class="input" placeholder="पासवर्ड टाका">
+    </div>
+    <button id="loginBtn" class="btn primary">Login</button>
+  </div>
+
+  <!-- Admin Area -->
+  <div id="adminArea" class="hidden">
+    <div class="panel">
+      <h3 id="formTitle">➕ नवीन उत्पादन जोडा</h3>
+      <form id="productForm">
+        <input type="hidden" id="editId">
+        <div class="two">
+          <div class="field"><label>उत्पादनाचे नाव (Product Name) *</label><input id="pname" class="input" required></div>
+          <div class="field"><label>किंमत (Price ₹) *</label><input id="pprice" type="number" step="0.01" class="input" required></div>
+          <div class="field"><label>प्रकार (Category)</label><select id="pcategory" class="input">
+            <option>Organic Fertilizer</option><option>Biofertilizer</option><option>Plant Nutrition</option><option>Plant Protection</option><option>Other</option>
+          </select></div>
+          <div class="field"><label>वजन / युनिट (उदा. 1 kg / 500 ml)</label><input id="punit" class="input"></div>
+          <div class="field" style="grid-column:1/-1"><label>माहिती (Description)</label><textarea id="pdesc" class="input" rows="2"></textarea></div>
+          <div class="field" style="grid-column:1/-1">
+            <label>फोटो (Photo) - ऐच्छिक</label>
+            <input id="pphoto" type="file" accept="image/*" class="input">
+            <small style="color:var(--muted); display:block; margin-top:4px;">१ MB पेक्षा कमी आकाराचा फोटो निवडा.</small>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+          <button type="submit" id="saveBtn" class="btn primary">उत्पादन Save करा</button>
+          <button type="button" id="cancelEdit" class="btn light hidden">Cancel Edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="row" style="justify-content:space-between; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 20px;">
+        <h3 style="border:none; padding:0; margin:0;">📋 सध्याची उत्पादने (Inventory)</h3>
+        <div class="row">
+          <button id="backupBtn" class="btn light" style="font-size: 12px;">⬇️ Backup Data</button>
+          <label class="btn light" for="importFile" style="cursor:pointer; font-size: 12px;">⬆️ Import Data</label>
+          <input type="file" id="importFile" class="hidden" accept=".json">
+        </div>
+      </div>
+      <div id="adminList" style="border:1px solid var(--line); border-radius:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Key must match exactly with index.html to share storage locally
+const KEY = "vedOrganicStore_v2";
+let products = [];
+try { products = JSON.parse(localStorage.getItem(KEY) || "[]") } catch(e) { products = [] }
+const $ = id => document.getElementById(id);
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(products)); return true; }
+  catch(e) { alert("Storage full! फोटोची साईझ कमी करा किंवा जुने उत्पादन Delete करा."); return false; }
+}
+
+$("loginBtn").onclick = () => {
+  if($("adminPassword").value === "VedAdmin123") {
+    $("loginArea").classList.add("hidden");
+    $("adminArea").classList.remove("hidden");
+    $("logoutBtn").classList.remove("hidden");
+    renderAdmin();
+  } else {
+    alert("चुकीचा पासवर्ड!");
+  }
+};
+
+$("logoutBtn").onclick = () => {
+  $("adminArea").classList.add("hidden");
+  $("loginArea").classList.remove("hidden");
+  $("logoutBtn").classList.add("hidden");
+  $("adminPassword").value = "";
+};
+
+function renderAdmin() {
+  $("adminList").innerHTML = products.length ? products.map(p => `
+    <div class="list-item">
+      <div class="row">
+        ${p.photo ? `<img src="${p.photo}" class="pic">` : `<div class="pic" style="display:grid;place-items:center;font-size:24px;">🌿</div>`}
+        <div>
+          <b style="font-size:16px;">${p.name}</b>
+          <div style="font-size:13px; color:var(--muted); margin-top:4px;">
+            ₹${p.price} ${p.unit ? `(${p.unit})` : ''} <span class="badge">${p.category}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn light" onclick="editP('${p.id}')">✏️ Edit</button>
+        <button class="btn danger" onclick="delP('${p.id}')">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join("") : '<div style="padding:25px;text-align:center;color:gray">कोणतेही उत्पादन जोडलेले नाही.</div>';
+}
+
+$("productForm").onsubmit = async e => {
+  e.preventDefault();
+  let id = $("editId").value;
+  let old = products.find(p => p.id === id);
+  let photo = old?.photo || "";
+  let file = $("pphoto").files[0];
+  
+  if(file) {
+    if(file.size > 1024 * 1024) { alert("फोटोची साईझ 1 MB पेक्षा कमी असावी."); return; }
+    photo = await new Promise((res, rej) => {
+      let r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+  
+  let p = {
+    id: id || Date.now().toString(36),
+    name: $("pname").value.trim(),
+    price: Number($("pprice").value),
+    category: $("pcategory").value,
+    unit: $("punit").value.trim(),
+    description: $("pdesc").value.trim(),
+    photo
+  };
+  
+  if(!p.name || p.price < 0) return alert("योग्य नाव आणि किंमत टाका.");
+  
+  if(old) products = products.map(x => x.id === id ? p : x);
+  else products.unshift(p);
+  
+  if(save()) {
+    $("productForm").reset();
+    $("editId").value = "";
+    $("formTitle").textContent = "➕ नवीन उत्पादन जोडा";
+    $("saveBtn").textContent = "उत्पादन Save करा";
+    $("cancelEdit").classList.add("hidden");
+    renderAdmin();
+  }
+};
+
+function editP(id) {
+  let p = products.find(x => x.id === id);
+  if(!p) return;
+  $("editId").value = p.id;
+  $("pname").value = p.name;
+  $("pprice").value = p.price;
+  $("pcategory").value = p.category;
+  $("punit").value = p.unit || "";
+  $("pdesc").value = p.description || "";
+  $("pphoto").value = "";
+  $("formTitle").textContent = "✏️ उत्पादन बदला (Edit Product)";
+  $("saveBtn").textContent = "बदल Save करा";
+  $("cancelEdit").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$("cancelEdit").onclick = () => {
+  $("productForm").reset();
+  $("editId").value = "";
+  $("formTitle").textContent = "➕ नवीन उत्पादन जोडा";
+  $("saveBtn").textContent = "उत्पादन Save करा";
+  $("cancelEdit").classList.add("hidden");
+};
+
+function delP(id) {
+  let p = products.find(x => x.id === id);
+  if(p && confirm("तुम्हाला नक्की '" + p.name + "' हे उत्पादन काढून टाकायचे आहे का?")) {
+    products = products.filter(x => x.id !== id);
+    if(save()) renderAdmin();
+  }
+}
+
+$("backupBtn").onclick = () => {
+  let b = new Blob([JSON.stringify(products, null, 2)], {type: "application/json"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(b);
+  a.download = "ved-organic-backup.json";
+  a.click();
+};
+
+$("importFile").onchange = async e => {
+  let f = e.target.files[0];
+  if(!f) return;
+  try {
+    let data = JSON.parse(await f.text());
+    if(confirm("तुम्हाला नक्की जुना बॅकअप रिस्टोअर करायचा आहे का? (सध्याची उत्पादने बदलली जातील)")) {
+      products = data;
+      if(save()) renderAdmin();
+    }
+  } catch(err) { alert("फाईल योग्य नाही."); }
+  e.target.value = "";
+};
+</script>
+</body>
+</html>
