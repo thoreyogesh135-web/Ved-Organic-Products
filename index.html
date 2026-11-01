@@ -259,14 +259,12 @@ $("orderBtn").onclick = () => {
   window.open(wa(msg), "_blank", "noopener");
 };
 
-// Expose a function for Firebase to push data to the UI
 window.loadFirebaseProducts = function(firebaseProducts) {
   window.products = firebaseProducts;
   window.renderProducts();
   window.renderCart(); 
 }
 
-// Initial render with empty array (until Firebase loads)
 window.renderProducts();
 window.renderCart();
 </script>
@@ -287,7 +285,8 @@ const firebaseConfig = {
   measurementId: "G-4TNDM7N0N5"
 };
 
-const ADMIN_UID = "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
+// YETHE TUMCHA EXACT UID TAKLA AAHE
+const ADMIN_UID = "EXDxRlYJx3UAPC6O9GuDFeJgKP53";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -304,7 +303,6 @@ function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 }
 
-// Listen to products continuously (Publicly visible)
 onSnapshot(productsRef, snapshot => {
   productsCache = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
   if(window.loadFirebaseProducts) {
@@ -380,4 +378,7 @@ function renderAdminList() {
 
   area.querySelectorAll("[data-edit]").forEach(btn => {
     btn.addEventListener("click", () => editProduct(btn.dataset.edit));
-  })
+  });
+
+  area.querySelectorAll("[data-delete]").forEach(btn => {
+    btn.addEventListener("click", () => deleteProduct(btn.dataset.delet
