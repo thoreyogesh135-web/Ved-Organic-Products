@@ -169,7 +169,6 @@
   <p>© <span id="year"></span> Ved Organic Products</p>
 </footer>
 
-<!-- 1. Store Vanilla Frontend JS -->
 <script>
 const WHATSAPP_NUMBER="918766581890";
 window.products = [];
@@ -269,7 +268,6 @@ window.renderProducts();
 window.renderCart();
 </script>
 
-<!-- 2. Firebase Backend JS Module -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -285,8 +283,8 @@ const firebaseConfig = {
   measurementId: "G-4TNDM7N0N5"
 };
 
-// YETHE TUMCHA EXACT UID TAKLA AAHE
-const ADMIN_UID = "EXDxRlYJx3UAPC6O9GuDFeJgKP53";
+// लहान 'e' वाला तुमचा खरा UID
+const ADMIN_UID = "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -381,4 +379,9 @@ function renderAdminList() {
   });
 
   area.querySelectorAll("[data-delete]").forEach(btn => {
-    btn.addEventListener("click", () => deleteProduct(btn.dataset.delet
+    btn.addEventListener("click", () => deleteProduct(btn.dataset.delete));
+  });
+}
+
+$("productForm").addEventListener("submit", async event => {
+  event.
