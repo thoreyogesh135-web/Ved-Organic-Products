@@ -91,7 +91,53 @@
       <input id="adminEmail" type="email" placeholder="Admin Email">
       <input id="adminPassword" type="password" placeholder="Password">
       <button class="btn primary" id="loginBtn">Login</button>
-    </div>
+  <script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCw0HqW5QGyWMy3ubRTzOimpoOX9mudrz",
+  authDomain: "ved-organic-products.firebaseapp.com",
+  projectId: "ved-organic-products",
+  storageBucket: "ved-organic-products.firebasestorage.app",
+  messagingSenderId: "387463932379",
+  appId: "1:387463932379:web:6e22379cc62d190c725ffe"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("adminEmail").value.trim();
+  const password = document.getElementById("adminPassword").value;
+  const output = document.getElementById("loginMessage");
+
+  if (!email || !password) {
+    output.textContent = "Email आणि Password भरा.";
+    return;
+  }
+
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+
+    if (result.user.uid !== "eXDxRlYJx3UAPC6O9GuDFeJgKP53") {
+      await auth.signOut();
+      output.textContent = "या खात्याला Admin परवानगी नाही.";
+      return;
+    }
+
+    output.textContent = "Admin Login Successful!";
+  } catch (error) {
+    output.textContent = "Login Error: " + error.code;
+  }
+});
+  </script>
+    
   </div>
 </section>
 <section class="section" id="contact">
