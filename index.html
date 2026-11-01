@@ -600,3 +600,16 @@ $("cancelEditBtn").addEventListener("click", resetForm);
 
 $("cancelEditBtn").addEventListener("click", resetForm);
 </script>
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /products/{productId} {
+      allow read: if true;
+
+      allow create, update, delete: if
+        request.auth != null &&
+        request.auth.uid == "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
+    }
+  }
+}
