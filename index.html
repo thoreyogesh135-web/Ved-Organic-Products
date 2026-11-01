@@ -126,3 +126,477 @@ renderProducts();renderCart();
 </script>
 </body>
 </html>
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCw0HqW5QGyWMy3ubRTzOimpoOX9mudrz",
+  authDomain: "ved-organic-products.firebaseapp.com",
+  projectId: "ved-organic-products",
+  storageBucket: "ved-organic-products.firebasestorage.app",
+  messagingSenderId: "387463932379",
+  appId: "1:387463932379:web:6e22379cc62d190c725ffe",
+  measurementId: "G-4TNDM7N0N5"
+};
+
+const ADMIN_UID = "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const productsRef = collection(db, "products");
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let productsCache = [];
+let unsubscribeProducts = null;
+
+function message(id, text) {
+  $(id).textContent = text;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
+}
+
+function showAdmin(user) {
+  currentUser = user;
+
+  const allowed = !!user && user.uid === ADMIN_UID;
+
+  $("adminLogin").classList.toggle("hidden", allowed);
+  $("adminDashboard").classList.toggle("hidden", !allowed);
+
+  if (allowed) {
+    loadAdminProducts();
+  } else if (unsubscribeProducts) {
+    unsubscribeProducts();
+    unsubscribeProducts = null;
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if (user && user.uid !== ADMIN_UID) {
+    signOut(auth);
+    showAdmin(null);
+    message("loginMessage", "या खात्याला Admin परवानगी नाही.");
+    return;
+  }
+
+  showAdmin(user);
+});
+
+$("loginBtn").addEventListener("click", async () => {
+  const email = $("adminEmail").value.trim();
+  const password = $("adminPassword").value;
+
+  if (!email || !password) {
+    message("loginMessage", "Email आणि Password भरा.");
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    message("loginMessage", "Login successful.");
+  } catch (error) {
+    message("loginMessage", "Login failed: " + error.message);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+function loadAdminProducts() {
+  if (unsubscribeProducts) unsubscribeProducts();
+
+  unsubscribeProducts = onSnapshot(productsRef, snapshot => {
+    productsCache = snapshot.docs.map(item => ({
+      id: item.id,
+      ...item.data()
+    }));
+
+    window.loadFirebaseProducts(productsCache);
+    renderAdminList();
+  }, error => {
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCw0HqW5QGyWMy3ubRTzOimpoOX9mudrz",
+  authDomain: "ved-organic-products.firebaseapp.com",
+  projectId: "ved-organic-products",
+  storageBucket: "ved-organic-products.firebasestorage.app",
+  messagingSenderId: "387463932379",
+  appId: "1:387463932379:web:6e22379cc62d190c725ffe",
+  measurementId: "G-4TNDM7N0N5"
+};
+
+const ADMIN_UID = "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const productsRef = collection(db, "products");
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let productsCache = [];
+let unsubscribeProducts = null;
+
+function message(id, text) {
+  $(id).textContent = text;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
+}
+
+function showAdmin(user) {
+  currentUser = user;
+
+  const allowed = !!user && user.uid === ADMIN_UID;
+
+  $("adminLogin").classList.toggle("hidden", allowed);
+  $("adminDashboard").classList.toggle("hidden", !allowed);
+
+  if (allowed) {
+    loadAdminProducts();
+  } else if (unsubscribeProducts) {
+    unsubscribeProducts();
+    unsubscribeProducts = null;
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if (user && user.uid !== ADMIN_UID) {
+    signOut(auth);
+    showAdmin(null);
+    message("loginMessage", "या खात्याला Admin परवानगी नाही.");
+    return;
+  }
+
+  showAdmin(user);
+});
+
+$("loginBtn").addEventListener("click", async () => {
+  const email = $("adminEmail").value.trim();
+  const password = $("adminPassword").value;
+
+  if (!email || !password) {
+    message("loginMessage", "Email आणि Password भरा.");
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    message("loginMessage", "Login successful.");
+  } catch (error) {
+    message("loginMessage", "Login failed: " + error.message);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+function loadAdminProducts() {
+  if (unsubscribeProducts) unsubscribeProducts();
+
+  unsubscribeProducts = onSnapshot(productsRef, snapshot => {
+    productsCache = snapshot.docs.map(item => ({
+      id: item.id,
+      ...item.data()
+    }));
+
+    window.loadFirebaseProducts(productsCache);
+    renderAdminList();
+  }, error => {
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCw0HqW5QGyWMy3ubRTzOimpoOX9mudrz",
+  authDomain: "ved-organic-products.firebaseapp.com",
+  projectId: "ved-organic-products",
+  storageBucket: "ved-organic-products.firebasestorage.app",
+  messagingSenderId: "387463932379",
+  appId: "1:387463932379:web:6e22379cc62d190c725ffe",
+  measurementId: "G-4TNDM7N0N5"
+};
+
+const ADMIN_UID = "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const productsRef = collection(db, "products");
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let productsCache = [];
+let unsubscribeProducts = null;
+
+function message(id, text) {
+  $(id).textContent = text;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[c]));
+}
+
+function showAdmin(user) {
+  currentUser = user;
+
+  const allowed = !!user && user.uid === ADMIN_UID;
+
+  $("adminLogin").classList.toggle("hidden", allowed);
+  $("adminDashboard").classList.toggle("hidden", !allowed);
+
+  if (allowed) {
+    loadAdminProducts();
+  } else if (unsubscribeProducts) {
+    unsubscribeProducts();
+    unsubscribeProducts = null;
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if (user && user.uid !== ADMIN_UID) {
+    signOut(auth);
+    showAdmin(null);
+    message("loginMessage", "या खात्याला Admin परवानगी नाही.");
+    return;
+  }
+
+  showAdmin(user);
+});
+
+$("loginBtn").addEventListener("click", async () => {
+  const email = $("adminEmail").value.trim();
+  const password = $("adminPassword").value;
+
+  if (!email || !password) {
+    message("loginMessage", "Email आणि Password भरा.");
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    message("loginMessage", "Login successful.");
+  } catch (error) {
+    message("loginMessage", "Login failed: " + error.message);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+function loadAdminProducts() {
+  if (unsubscribeProducts) unsubscribeProducts();
+
+  unsubscribeProducts = onSnapshot(productsRef, snapshot => {
+    productsCache = snapshot.docs.map(item => ({
+      id: item.id,
+      ...item.data()
+    }));
+
+    window.loadFirebaseProducts(productsCache);
+    renderAdminList();
+  }, error => {
+    message("adminMessage", "Products load झाले नाहीत: " + error.message);
+  });
+}
+
+function renderAdminList() {
+  const area = $("adminProductList");
+
+  if (!productsCache.length) {
+    area.textContent = "अद्याप कोणतेही Products नाहीत.";
+    return;
+  }
+
+  area.innerHTML = productsCache.map(p => `
+    <div class="panel">
+      <strong>${escapeHTML(p.name)}</strong>
+      <p>${escapeHTML(p.category)} · ₹${Number(p.price || 0)}</p>
+      <div class="row">
+        <button class="btn light" data-edit="${escapeHTML(p.id)}">Edit</button>
+        <button class="btn danger" data-delete="${escapeHTML(p.id)}">Delete</button>
+      </div>
+    </div>
+  `).join("");
+
+  area.querySelectorAll("[data-edit]").forEach(button => {
+    button.addEventListener("click", () => editProduct(button.dataset.edit));
+  });
+
+  area.querySelectorAll("[data-delete]").forEach(button => {
+    button.addEventListener("click", () => deleteProduct(button.dataset.delete));
+  });
+}
+
+$("productForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+
+  const name = $("pName").value.trim();
+  const price = Number($("pPrice").value);
+
+  if (!name || !Number.isFinite(price) || price < 0) {
+    message("adminMessage", "Product नाव आणि योग्य किंमत भरा.");
+    return;
+  }
+
+  const product = {
+    name,
+    category: $("pCategory").value,
+    price,
+    unit: $("pUnit").value.trim(),
+    description: $("pDescription").value.trim(),
+    photo: $("pPhoto").value.trim(),
+    updatedAt: serverTimestamp()
+  };
+
+  const id = $("editProductId").value;
+
+  try {
+    if (id) {
+      await updateDoc(doc(db, "products", id), product);
+      message("adminMessage", "Product Update झाला!");
+    } else {
+      product.createdAt = serverTimestamp();
+      await addDoc(productsRef, product);
+      message("adminMessage", "नवीन Product Add झाला!");
+    }
+
+    resetForm();
+  } catch (error) {
+    message("adminMessage", "Error: " + error.message);
+  }
+});
+
+function editProduct(id) {
+  const p = productsCache.find(item => item.id === id);
+  if (!p) return;
+
+  $("editProductId").value = p.id;
+  $("pName").value = p.name || "";
+  $("pCategory").value = p.category || "Other";
+  $("pPrice").value = p.price ?? "";
+  $("pUnit").value = p.unit || "";
+  $("pDescription").value = p.description || "";
+  $("pPhoto").value = p.photo || "";
+
+  $("saveProductBtn").textContent = "Update Product";
+  $("productForm").scrollIntoView({ behavior: "smooth" });
+}
+
+async function deleteProduct(id) {
+  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+
+  if (!confirm("हा Product Delete करायचा आहे का?")) return;
+
+  try {
+    await deleteDoc(doc(db, "products", id));
+    message("adminMessage", "Product Delete झाला.");
+  } catch (error) {
+    message("adminMessage", "Delete Error: " + error.message);
+  }
+}
+
+function resetForm() {
+  $("productForm").reset();
+  $("editProductId").value = "";
+  $("saveProductBtn").textContent = "Save Product";
+}
+
+$("cancelEditBtn").addEventListener("click", resetForm);
+</script>
+  $("productForm").reset();
+  $("editProductId").value = "";
+  $("saveProductBtn").textContent = "Save Product";
+}
+
+$("cancelEditBtn").addEventListener("click", resetForm);
+</script>
