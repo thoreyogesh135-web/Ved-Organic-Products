@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Ved Organic Products - कृषी आणि सेंद्रिय शेती उत्पादने">
 <title>Ved Organic Products | Online Store</title>
 <style>
 :root{--green:#176b3a;--dark:#103b25;--lime:#d8efb2;--cream:#f7fbf4;--ink:#203027;--muted:#68776d;--line:#dce8dd;--red:#a92c25}
@@ -381,7 +380,6 @@ onAuthStateChanged(auth, user => {
   showAdmin(user);
 });
 
-// Login Button Click Event Handler
 $("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
   const email = $("adminEmail").value.trim();
@@ -461,7 +459,7 @@ $("productForm").addEventListener("submit", async event => {
 
   $("saveProductBtn").disabled = true;
 
-  try {
+    try {
     if(id){
       await updateDoc(doc(db, "products", id), product);
       message("adminMessage", "Product Updated!");
@@ -474,7 +472,7 @@ $("productForm").addEventListener("submit", async event => {
   } catch(error) {
     message("adminMessage", "Save Error: " + error.code);
   } finally {
-    $("saveProductBtn").disabled = false;
+    $("saveProductBtn".disabled = false);
   }
 });
 
@@ -486,7 +484,7 @@ function editProduct(id){
   $("pName").value = p.name || "";
   $("pCategory").value = p.category || "Other";
   $("pPrice").value = p.price ?? "";
-  $("pUnit").value = p.unit || "";
+  $("pUnit").value.value = p.unit || "";
   $("pPhoto").value = p.photo || "";
   $("pDescription").value = p.description || "";
 
