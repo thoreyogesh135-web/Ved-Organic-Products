@@ -143,4 +143,265 @@
           <div class="row">
             <button type="submit" id="saveProductBtn" class="btn primary">Save Product</button>
             <button type="button" id="cancelEditBtn" class="btn light">Cancel</button>
-            
+          </div>
+        </form>
+      </div>
+
+      <div id="adminProductList" class="grid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="container">
+    <h2>Contact Us</h2>
+    <div class="features">
+      <div class="feature">📱<strong>Mobile / WhatsApp</strong><a href="tel:8766581890">8766581890</a></div>
+      <div class="feature">📧<strong>Email</strong><a href="mailto:vedantthore05@gmail.com">vedantthore05@gmail.com</a></div>
+      <div class="feature">🌿<strong>Business</strong><span>Ved Organic Products</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Ved Organic Products</strong></p>
+  <p>शाश्वत शेतीसाठी योग्य उत्पादने 🌱</p>
+  <p>© <span id="year"></span> Ved Organic Products</p>
+</footer>
+
+<script>
+const WHATSAPP_NUMBER="918766581890";
+window.products = [];
+window.cart = {};
+
+const $ = id => document.getElementById(id);
+$("year").textContent = new Date().getFullYear();
+
+function wa(msg){return "https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(msg)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(n){return new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(Number(n)||0)}
+
+window.renderProducts = function() {
+  let q=$("search").value.toLowerCase().trim(), cat=$("filter").value;
+  let list=window.products.filter(p=>(!cat||p.category===cat)&&[p.name,p.description,p.category].join(" ").toLowerCase().includes(q));
+  $("productGrid").innerHTML=list.length?list.map(p=>`
+    <article class="card">
+      <div class="pic">${p.photo?`<img src="${p.photo}" alt="${esc(p.name)}">`:"🌿"}</div>
+      <div class="cardbody">
+        <span class="tag">${esc(p.category)}</span>
+        <h3>${esc(p.name)}</h3>
+        <p class="desc">${esc(p.description||"अधिक माहितीसाठी संपर्क साधा.")}</p>
+        <div class="price">${fmt(p.price)} <span class="muted">${esc(p.unit||"")}</span></div>
+        <div class="actions">
+          <button class="btn primary" onclick="addCart('${p.id}')">कार्टमध्ये जोडा</button>
+          <a class="btn light" href="${wa("नमस्कार, मला "+p.name+" बद्दल माहिती हवी आहे. किंमत: "+fmt(p.price))}" target="_blank" rel="noopener">चौकशी</a>
+        </div>
+      </div>
+    </article>`).join(""):'<div class="empty">अद्याप उत्पादने उपलब्ध नाहीत. कृपया थोड्या वेळाने तपासा.</div>'
+}
+
+window.addCart = function(id) {
+  window.cart[id]=(window.cart[id]||0)+1;
+  window.renderCart();
+  $("cart").scrollIntoView({behavior:"smooth"});
+}
+
+window.renderCart = function() {
+  let ids = Object.keys(window.cart).filter(id => window.products.some(p => p.id === id) && window.cart[id] > 0);
+  $("cartCount").textContent = ids.reduce((a,id) => a + window.cart[id], 0);
+  
+  $("cartItems").innerHTML = ids.length ? ids.map(id => {
+    let p = window.products.find(x => x.id === id);
+    return `<div class="cartline">
+      <div><b>${esc(p.name)}</b><div class="muted">${fmt(p.price)} ${esc(p.unit||"")}</div></div>
+      <input class="input qty" aria-label="Quantity" type="number" min="1" max="999" value="${window.cart[id]}" onchange="setQty('${id}',this.value)">
+      <div class="lineprice"><b>${fmt(p.price * window.cart[id])}</b> <button class="btn danger" onclick="removeCart('${id}')">×</button></div>
+    </div>`
+  }).join("") : '<div class="empty">कार्ट रिकामी आहे. आधी उत्पादन निवडा.</div>';
+  
+  let total = ids.reduce((sum,id) => sum + window.products.find(p => p.id === id).price * window.cart[id], 0);
+  $("cartTotal").textContent = fmt(total);
+}
+
+window.setQty = function(id, v) {
+  let n = Math.floor(Number(v));
+  if(!Number.isFinite(n) || n<1) n=1;
+  window.cart[id] = Math.min(n, 999);
+  window.renderCart();
+}
+
+window.removeCart = function(id) {
+  delete window.cart[id];
+  window.renderCart();
+}
+
+$("search").addEventListener("input", window.renderProducts);
+$("filter").addEventListener("change", window.renderProducts);
+$("clearCart").onclick = () => { window.cart = {}; window.renderCart(); };
+
+$("orderBtn").onclick = () => {
+  let ids = Object.keys(window.cart).filter(id => window.products.some(p => p.id === id) && window.cart[id] > 0);
+  if(!ids.length){ alert("कृपया आधी कार्टमध्ये उत्पादन जोडा."); return; }
+  
+  let name = $("customerName").value.trim(), phone = $("customerPhone").value.trim(), address = $("customerAddress").value.trim();
+  if(!name || !phone || !address){ alert("कृपया नाव, मोबाईल नंबर आणि पत्ता भरा."); return; }
+  
+  let total = 0;
+  let lines = ids.map(id => {
+    let p = window.products.find(x => x.id === id);
+    let sub = p.price * window.cart[id];
+    total += sub;
+    return `• ${p.name} — ${window.cart[id]} x ${fmt(p.price)} = ${fmt(sub)}`;
+  });
+  
+  let msg = `Ved Organic Products - Order Request\nName: ${name}\nCustomer phone: ${phone}\nAddress: ${address}\n\nProducts:\n${lines.join("\n")}\n\nEstimated total: ${fmt(total)}\nकृपया उपलब्धता, delivery आणि final total confirm करा.`;
+  window.open(wa(msg), "_blank", "noopener");
+};
+
+window.loadFirebaseProducts = function(firebaseProducts) {
+  window.products = firebaseProducts;
+  window.renderProducts();
+  window.renderCart(); 
+}
+
+window.renderProducts();
+window.renderCart();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCw0HqW5QGyWMy3ubRTzOimpoOX9mudrz",
+  authDomain: "ved-organic-products.firebaseapp.com",
+  projectId: "ved-organic-products",
+  storageBucket: "ved-organic-products.firebasestorage.app",
+  messagingSenderId: "387463932379",
+  appId: "1:387463932379:web:6e22379cc62d190c725ffe",
+  measurementId: "G-4TNDM7N0N5"
+};
+
+const ADMIN_UID = "eXDxRlYJx3UAPC6O9GuDFeJgKP53";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const productsRef = collection(db, "products");
+
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let productsCache = [];
+
+function message(id, text) { $(id).textContent = text; }
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+}
+
+onSnapshot(productsRef, snapshot => {
+  productsCache = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+  if(window.loadFirebaseProducts) {
+    window.loadFirebaseProducts(productsCache);
+  }
+  if(currentUser && currentUser.uid === ADMIN_UID) {
+    renderAdminList();
+  }
+}, error => {
+  console.error("Products load error: ", error.message);
+});
+
+function showAdmin(user) {
+  currentUser = user;
+  const allowed = !!user && user.uid === ADMIN_UID;
+  
+  $("adminLogin").classList.toggle("hidden", allowed);
+  $("adminDashboard").classList.toggle("hidden", !allowed);
+  
+  if (allowed) {
+    renderAdminList();
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if (user && user.uid !== ADMIN_UID) {
+    signOut(auth);
+    showAdmin(null);
+    message("loginMessage", "या खात्याला Admin परवानगी नाही.");
+    return;
+  }
+  showAdmin(user);
+});
+
+$("loginBtn").addEventListener("click", async () => {
+  const email = $("adminEmail").value.trim();
+  const password = $("adminPassword").value;
+  if (!email || !password) {
+    message("loginMessage", "Email आणि Password भरा.");
+    return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    message("loginMessage", "Login successful.");
+    $("adminEmail").value = "";
+    $("adminPassword").value = "";
+  } catch (error) {
+    message("loginMessage", "Login failed: " + error.message);
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+function renderAdminList() {
+  const area = $("adminProductList");
+  if (!productsCache.length) {
+    area.innerHTML = "<div class='empty'>अद्याप कोणतेही Products नाहीत.</div>";
+    return;
+  }
+
+  area.innerHTML = productsCache.map(p => `
+    <div class="panel" style="margin-bottom:0;">
+      <strong>${escapeHTML(p.name)}</strong>
+      <p style="margin:5px 0;">${escapeHTML(p.category)} · ₹${Number(p.price || 0)}</p>
+      <div class="row">
+        <button class="btn light" data-edit="${escapeHTML(p.id)}">Edit</button>
+        <button class="btn danger" data-delete="${escapeHTML(p.id)}">Delete</button>
+      </div>
+    </div>
+  `).join("");
+
+  area.querySelectorAll("[data-edit]").forEach(btn => {
+    btn.addEventListener("click", () => editProduct(btn.dataset.edit));
+  });
+
+  area.querySelectorAll("[data-delete]").forEach(btn => {
+    btn.addEventListener("click", () => deleteProduct(btn.dataset.delete));
+  });
+}
+
+$("productForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+   if(!currentUser || currentUser.uid !== ADMIN_UID) return;
+  if(!confirm("हा Product Delete करायचा आहे का?")) return;
+
+  try {
+    await deleteDoc(doc(db, "products", id));
+    message("adminMessage", "Product Deleted!");
+  } catch(error) {
+    message("adminMessage", "Delete Error: " + error.code);
+  }
+}
+
+function resetForm(){
+  $("productForm").reset();
+  $("editProductId").value = "";
+  $("saveProductBtn").textContent = "Save Product";
+}
+
+$("cancelEditBtn").addEventListener("click", resetForm);
+</script>
+</body>
+</html>
